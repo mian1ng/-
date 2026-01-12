@@ -1,0 +1,37 @@
+# 创建新表用于数据清洗
+create table db_msg.tb_msg_etl(
+                                  msg_time string comment "消息发送时间",
+                                  sender_name string comment "发送人昵称",
+                                  sender_account string comment "发送人账号",
+                                  sender_sex string comment "发送人性别",
+                                  sender_ip string comment "发送人ip地址",
+                                  sender_os string comment "发送人操作系统",
+                                  sender_phonetype string comment "发送人手机型号",
+                                  sender_network string comment "发送人网络类型",
+                                  sender_gps string comment "发送人的GPS定位",
+                                  receiver_name string comment "接收人昵称",
+                                  receiver_ip string comment "接收人IP",
+                                  receiver_account string comment "接收人账号",
+                                  receiver_os string comment "接收人操作系统",
+                                  receiver_phonetype string comment "接收人手机型号",
+                                  receiver_network string comment "接收人网络类型",
+                                  receiver_gps string comment "接收人的GPS定位",
+                                  receiver_sex string comment "接收人性别",
+                                  msg_type string comment "消息类型",
+                                  distance string comment "双方距离",
+                                  message string comment "消息内容",
+                                  msg_day string comment "消息日",
+                                  msg_hour string comment "消息小时",
+                                  sender_lng double comment "经度",
+                                  sender_lat double comment "纬度"
+);
+
+# 从旧表中进行数据清洗，导入到新表中
+insert overwrite table db_msg.tb_msg_etl
+select * ,date (tb_msg_source.msg_time) as msg_day,
+       hour(tb_msg_source.msg_time) as msg_hour,
+       split(tb_msg_source.sender_gps,',')[0] as sender_lng,
+       split(tb_msg_source.sender_gps,',')[1] as sender_lat
+from db_msg.tb_msg_source
+where length(sender_gps) > 0;
+
